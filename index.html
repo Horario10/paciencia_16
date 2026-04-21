@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Paciência Real da Vovó v3</title>
+    <title>Paciência da Vovó - Versão Magnética</title>
     <style>
         :root {
             --felt: #1a472a;
-            --card-w: calc((100vw - 30px) / 7);
+            --card-w: calc((100vw - 35px) / 7);
             --card-h: calc(var(--card-w) * 1.45);
             --accent: #ffd700;
-            --radius: 8px;
+            --radius: 10px;
         }
 
         * { 
@@ -27,84 +27,87 @@
         }
 
         header {
-            height: 40px; display: flex; justify-content: space-between;
-            align-items: center; padding: 0 15px; background: rgba(0,0,0,0.4);
-            font-size: 13px; font-weight: bold; color: white;
+            height: 45px; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 15px; background: rgba(0,0,0,0.5);
+            font-size: 14px; font-weight: bold; color: white;
         }
 
-        /* --- ZONA SUPERIOR --- */
         .top-row {
             display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 3px; padding: 10px 5px;
+            gap: 4px; padding: 15px 5px;
         }
 
-        /* --- BARRA DE CONTROLE (SUBIU!) --- */
         .control-bar {
-            background: rgba(255,255,255,0.1);
-            margin: 5px; border-radius: 15px;
+            background: rgba(255,255,255,0.15);
+            margin: 5px 10px; border-radius: 20px;
             display: flex; justify-content: space-around;
-            padding: 10px; border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px; border: 2px solid rgba(255,255,255,0.3);
         }
 
         .btn {
-            background: #fff; border: none; color: #333;
-            padding: 8px 12px; border-radius: 10px; font-size: 11px;
-            font-weight: bold; display: flex; flex-direction: column;
-            align-items: center; min-width: 65px; gap: 4px;
-            box-shadow: 0 4px 0 #ccc;
+            background: #fff; border: none; color: #000;
+            padding: 10px 15px; border-radius: 12px; font-size: 12px;
+            font-weight: 900; display: flex; flex-direction: column;
+            align-items: center; min-width: 80px; gap: 5px;
+            box-shadow: 0 5px 0 #999;
         }
 
-        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #ccc; }
-        .btn.gold { background: var(--accent); box-shadow: 0 4px 0 #b8860b; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #999; }
+        .btn.gold { background: var(--accent); box-shadow: 0 5px 0 #b8860b; }
 
-        /* --- MESA --- */
         .tableau { 
             flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); 
-            gap: 3px; padding: 10px 5px; align-content: start;
+            gap: 4px; padding: 20px 5px; align-content: start;
         }
 
+        /* HITBOX AUMENTADA (O SEGREDO) */
         .slot {
             width: 100%; height: var(--card-h);
-            border: 1.5px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.1);
             border-radius: var(--radius); position: relative;
-            background: rgba(0,0,0,0.15);
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* Slot brilhando quando a carta chega perto */
+        .slot.target-active {
+            border: 3px solid var(--accent) !important;
+            box-shadow: 0 0 20px var(--accent);
+            background: rgba(255, 215, 0, 0.2);
         }
 
         .card {
             width: 100%; height: var(--card-h);
             background: white; border-radius: var(--radius);
             position: absolute; color: black; display: flex;
-            flex-direction: column; padding: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-            font-size: 15px; font-weight: 900;
+            flex-direction: column; padding: 6px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+            font-size: 18px; font-weight: 900; /* Fonte maior para a vovó */
         }
 
         .card.red { color: #d32f2f; }
         .card.black { color: #1a1a1a; }
         .card.back {
             background: #2b5797; border: 2px solid white;
-            background-image: radial-gradient(circle, #3b67a7, #1b4787);
+            background-image: repeating-linear-gradient(45deg, #2b5797, #2b5797 10px, #3b67a7 10px, #3b67a7 20px);
         }
 
-        .card.dragging { z-index: 2000 !important; opacity: 0.9; transform: scale(1.15); pointer-events: none; }
-        
-        .hint-pulse { 
-            box-shadow: 0 0 20px 8px #fff !important;
-            animation: pulse-border 0.8s infinite alternate;
+        .card.dragging { 
+            z-index: 5000 !important; 
+            opacity: 0.95; 
+            transform: scale(1.2); 
+            pointer-events: none;
         }
 
-        @keyframes pulse-border { from { opacity: 1; } to { opacity: 0.4; } }
-
-        #mode-tag {
-            font-size: 10px; padding: 2px 6px; background: #fff; color: #000;
-            border-radius: 10px; margin-left: 10px; text-transform: uppercase;
+        .hint-anim { 
+            animation: pulse-hint 0.6s infinite alternate;
         }
+        @keyframes pulse-hint { from { box-shadow: 0 0 5px #fff; } to { box-shadow: 0 0 25px var(--accent); } }
     </style>
 </head>
 <body>
 
     <header>
-        <div>PONTOS: <span id="score">0</span> <span id="mode-tag">Normal</span></div>
+        <div>PONTOS: <span id="score">0</span> <small id="mode-info" style="margin-left:10px; color:var(--accent)"></small></div>
         <span>MOVIMENTOS: <span id="moves">0</span></span>
     </header>
 
@@ -112,48 +115,38 @@
         <div id="stock" class="slot" onclick="drawCard()"></div>
         <div id="waste" class="slot"></div>
         <div class="slot" style="visibility: hidden;"></div>
-        <div id="f-0" class="slot foundation" data-f="0"></div>
-        <div id="f-1" class="slot foundation" data-f="1"></div>
-        <div id="f-2" class="slot foundation" data-f="2"></div>
-        <div id="f-3" class="slot foundation" data-f="3"></div>
+        <div id="f-0" class="slot foundation" data-type="foundation" data-id="0"></div>
+        <div id="f-1" class="slot foundation" data-type="foundation" data-id="1"></div>
+        <div id="f-2" class="slot foundation" data-type="foundation" data-id="2"></div>
+        <div id="f-3" class="slot foundation" data-type="foundation" data-id="3"></div>
     </div>
 
     <div class="control-bar">
-        <button class="btn" onclick="undo()"><span>↩️</span>DESFAZER</button>
-        <button class="btn gold" onclick="giveHint()"><span>💡</span>IDEIAS</button>
+        <button class="btn" onclick="undo()"><span>↩️</span>VOLTAR</button>
+        <button class="btn gold" onclick="giveHint()"><span>💡</span>DICA</button>
         <button class="btn" onclick="location.reload()"><span>🔄</span>NOVO</button>
     </div>
 
     <div class="tableau" id="tableau-root">
-        <div id="t-0" class="slot col" data-t="0"></div>
-        <div id="t-1" class="slot col" data-t="1"></div>
-        <div id="t-2" class="slot col" data-t="2"></div>
-        <div id="t-3" class="slot col" data-t="3"></div>
-        <div id="t-4" class="slot col" data-t="4"></div>
-        <div id="t-5" class="slot col" data-t="5"></div>
-        <div id="t-6" class="slot col" data-t="6"></div>
+        <div id="t-0" class="slot col" data-type="tableau" data-id="0"></div>
+        <div id="t-1" class="slot col" data-type="tableau" data-id="1"></div>
+        <div id="t-2" class="slot col" data-type="tableau" data-id="2"></div>
+        <div id="t-3" class="slot col" data-type="tableau" data-id="3"></div>
+        <div id="t-4" class="slot col" data-type="tableau" data-id="4"></div>
+        <div id="t-5" class="slot col" data-type="tableau" data-id="5"></div>
+        <div id="t-6" class="slot col" data-type="tableau" data-id="6"></div>
     </div>
 
     <script>
         const SUITS = ['♥', '♦', '♣', '♠'];
         const VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-        let G = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[],[],[],[]], score:0, moves:0, history:[], mode: 'clássico' };
-        
-        let dragItem = null;
-        let dragData = null;
-        let diffConfig = { drawCount: 1 };
+        let G = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[],[],[],[]], score:0, moves:0, history:[] };
+        let dragItem = null, dragData = null, drawCount = 1;
 
         function init() {
-            // "Gambiarra" de Dificuldade Aleatória
-            const modes = [
-                { name: 'Modo Sorte (Virar 1)', draw: 1, scoreMult: 1 },
-                { name: 'Modo Pro (Virar 3)', draw: 3, scoreMult: 2 },
-                { name: 'Modo Caótico', draw: 1, scoreMult: 1.5 }
-            ];
-            let chosen = modes[Math.floor(Math.random() * modes.length)];
-            diffConfig.drawCount = chosen.draw;
-            document.getElementById('mode-tag').innerText = chosen.name;
-
+            drawCount = Math.random() > 0.5 ? 1 : 3;
+            document.getElementById('mode-info').innerText = drawCount === 1 ? "Modo Fácil" : "Modo Difícil";
+            
             let deck = [];
             SUITS.forEach(s => VALUES.forEach((v, i) => {
                 deck.push({ suit: s, value: v, rank: i+1, color: (s==='♥'||s==='♦')?'red':'black', hidden: true });
@@ -172,25 +165,21 @@
         }
 
         function render() {
-            const s = document.getElementById('stock');
-            s.innerHTML = G.stock.length ? '<div class="card back"></div>' : '<div style="color:white; opacity:0.2; text-align:center; padding-top:15px; font-size:20px">🔄</div>';
-            
-            const w = document.getElementById('waste');
-            w.innerHTML = '';
+            document.getElementById('stock').innerHTML = G.stock.length ? '<div class="card back"></div>' : '<div style="color:white;text-align:center;padding-top:15px">🔄</div>';
+            const w = document.getElementById('waste'); w.innerHTML = '';
             if(G.waste.length) w.appendChild(createCardUI(G.waste[G.waste.length-1], 'waste', 0, G.waste.length-1));
 
             G.foundations.forEach((f, i) => {
                 const el = document.getElementById(`f-${i}`);
-                el.innerHTML = f.length ? '' : `<div style="opacity:0.2; width:100%; text-align:center; line-height:var(--card-h)">${SUITS[i]}</div>`;
+                el.innerHTML = f.length ? '' : `<div style="opacity:0.2;text-align:center;line-height:var(--card-h)">${SUITS[i]}</div>`;
                 if(f.length) el.appendChild(createCardUI(f[f.length-1], 'foundation', i, f.length-1));
             });
 
             G.tableau.forEach((t, i) => {
-                const el = document.getElementById(`t-${i}`);
-                el.innerHTML = '';
+                const el = document.getElementById(`t-${i}`); el.innerHTML = '';
                 t.forEach((c, idx) => {
                     const cardEl = createCardUI(c, 'tableau', i, idx);
-                    cardEl.style.top = (idx * 22) + 'px';
+                    cardEl.style.top = (idx * 24) + 'px'; // Mais espaço entre cartas
                     el.appendChild(cardEl);
                 });
             });
@@ -198,13 +187,12 @@
             document.getElementById('moves').innerText = G.moves;
         }
 
-        function createCardUI(card, pType, pIdx, cIdx) {
+        function createCardUI(card, type, pIdx, cIdx) {
             const div = document.createElement('div');
             div.className = `card ${card.hidden ? 'back' : card.color}`;
-            div.dataset.type = pType; div.dataset.p = pIdx; div.dataset.c = cIdx;
-            
             if(!card.hidden) {
-                div.innerHTML = `<div>${card.value}${card.suit}</div><div style="font-size:24px; margin:auto">${card.suit}</div><div style="transform:rotate(180deg); font-size:10px">${card.value}${card.suit}</div>`;
+                div.innerHTML = `<div>${card.value}${card.suit}</div><div style="font-size:30px; margin:auto">${card.suit}</div>`;
+                div.dataset.type = type; div.dataset.p = pIdx; div.dataset.c = cIdx;
                 div.addEventListener('touchstart', onDragStart);
             }
             return div;
@@ -212,19 +200,8 @@
 
         function onDragStart(e) {
             const el = e.currentTarget;
-            const type = el.dataset.type;
-            const pIdx = parseInt(el.dataset.p);
-            const cIdx = parseInt(el.dataset.c);
-
-            if(type === 'tableau') {
-                const pile = G.tableau[pIdx];
-                for(let i=cIdx; i<pile.length-1; i++) {
-                    if(pile[i].color === pile[i+1].color || pile[i].rank !== pile[i+1].rank + 1) return;
-                }
-            }
-
             dragItem = el;
-            dragData = { type, pIdx, cIdx };
+            dragData = { type: el.dataset.type, pIdx: parseInt(el.dataset.p), cIdx: parseInt(el.dataset.c) };
             el.classList.add('dragging');
             document.addEventListener('touchmove', onDragMove, { passive: false });
             document.addEventListener('touchend', onDragEnd);
@@ -234,24 +211,39 @@
             e.preventDefault();
             const touch = e.touches[0];
             dragItem.style.position = 'fixed';
-            dragItem.style.left = (touch.clientX - 35) + 'px';
-            dragItem.style.top = (touch.clientY - 40) + 'px';
+            dragItem.style.left = (touch.clientX - 40) + 'px';
+            dragItem.style.top = (touch.clientY - 50) + 'px';
+
+            // GAMBIARRA DA HITBOX: Achar o alvo mais próximo
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('target-active'));
+            let nearest = findNearestSlot(touch.clientX, touch.clientY);
+            if(nearest) nearest.classList.add('target-active');
+        }
+
+        function findNearestSlot(x, y) {
+            let slots = document.querySelectorAll('.slot[data-type]');
+            let nearest = null;
+            let minDist = 120; // Distância de 120 pixels para "sugar" a carta
+
+            slots.forEach(slot => {
+                let rect = slot.getBoundingClientRect();
+                let centerX = rect.left + rect.width / 2;
+                let centerY = rect.top + rect.height / 2;
+                let dist = Math.hypot(x - centerX, y - centerY);
+                if(dist < minDist) { minDist = dist; nearest = slot; }
+            });
+            return nearest;
         }
 
         function onDragEnd(e) {
             const touch = e.changedTouches[0];
-            dragItem.hidden = true;
-            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-            dragItem.hidden = false;
-
-            let targetSlot = dropTarget ? dropTarget.closest('.slot') : null;
-            if(targetSlot) {
-                const tIdx = parseInt(targetSlot.dataset.t);
-                const fIdx = parseInt(targetSlot.dataset.f);
-                if(!isNaN(tIdx)) tryMove('tableau', tIdx);
-                else if(!isNaN(fIdx)) tryMove('foundation', fIdx);
+            let nearest = findNearestSlot(touch.clientX, touch.clientY);
+            
+            if(nearest) {
+                tryMove(nearest.dataset.type, parseInt(nearest.dataset.id));
             }
 
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('target-active'));
             document.removeEventListener('touchmove', onDragMove);
             document.removeEventListener('touchend', onDragEnd);
             dragItem.classList.remove('dragging');
@@ -279,7 +271,7 @@
                 from.splice(dragData.cIdx);
                 target.push(...movingCards);
                 if(dragData.type === 'tableau' && from.length > 0) from[from.length-1].hidden = false;
-                G.moves++; G.score += (toType === 'foundation' ? 20 : 5);
+                G.moves++; G.score += 10;
             }
         }
 
@@ -289,11 +281,8 @@
                 G.stock = G.waste.reverse().map(c => ({...c, hidden: true}));
                 G.waste = [];
             } else {
-                for(let i=0; i<diffConfig.drawCount; i++) {
-                    if(G.stock.length) {
-                        let c = G.stock.pop(); c.hidden = false;
-                        G.waste.push(c);
-                    }
+                for(let i=0; i<drawCount; i++) {
+                    if(G.stock.length) { let c = G.stock.pop(); c.hidden=false; G.waste.push(c); }
                 }
             }
             G.moves++; render();
@@ -301,9 +290,7 @@
 
         function giveHint() {
             let options = [];
-            // Cartas das colunas
             G.tableau.forEach((p, i) => { if(p.length) options.push({c: p[p.length-1], type:'tableau', p:i, cIdx: p.length-1}) });
-            // Carta do descarte
             if(G.waste.length) options.push({c: G.waste[G.waste.length-1], type:'waste', p:0, cIdx: G.waste.length-1});
 
             for(let opt of options) {
@@ -331,14 +318,14 @@
             const cardEl = document.querySelector(`[data-type="${from.type}"][data-p="${from.p}"][data-c="${from.cIdx}"]`);
             const destEl = document.getElementById(toId);
             if(cardEl && destEl) {
-                cardEl.classList.add('hint-pulse'); destEl.classList.add('hint-pulse');
-                setTimeout(() => { cardEl.classList.remove('hint-pulse'); destEl.classList.remove('hint-pulse'); }, 1500);
+                cardEl.classList.add('hint-anim'); destEl.classList.add('target-active');
+                setTimeout(() => { cardEl.classList.remove('hint-anim'); destEl.classList.remove('target-active'); }, 1500);
             }
         }
 
         function saveHistory() {
             G.history.push(JSON.stringify({stock:G.stock, waste:G.waste, foundations:G.foundations, tableau:G.tableau, score:G.score, moves:G.moves}));
-            if(G.history.length > 20) G.history.shift();
+            if(G.history.length > 25) G.history.shift();
         }
 
         function undo() {
