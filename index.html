@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Paciência Real da Vovó</title>
+    <title>Paciência Real da Vovó v3</title>
     <style>
         :root {
             --felt: #1a472a;
             --card-w: calc((100vw - 30px) / 7);
             --card-h: calc(var(--card-w) * 1.45);
             --accent: #ffd700;
-            --radius: 6px;
+            --radius: 8px;
         }
 
         * { 
@@ -26,83 +26,89 @@
             overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* --- PLACAR --- */
         header {
-            height: 50px; display: flex; justify-content: space-between;
-            align-items: center; padding: 0 15px; background: rgba(0,0,0,0.3);
-            font-size: 14px; font-weight: bold; color: white;
+            height: 40px; display: flex; justify-content: space-between;
+            align-items: center; padding: 0 15px; background: rgba(0,0,0,0.4);
+            font-size: 13px; font-weight: bold; color: white;
         }
 
-        /* --- TABULEIRO --- */
-        .game-grid {
+        /* --- ZONA SUPERIOR --- */
+        .top-row {
             display: grid; grid-template-columns: repeat(7, 1fr);
             gap: 3px; padding: 10px 5px;
         }
 
-        .tableau { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; padding: 5px; }
+        /* --- BARRA DE CONTROLE (SUBIU!) --- */
+        .control-bar {
+            background: rgba(255,255,255,0.1);
+            margin: 5px; border-radius: 15px;
+            display: flex; justify-content: space-around;
+            padding: 10px; border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn {
+            background: #fff; border: none; color: #333;
+            padding: 8px 12px; border-radius: 10px; font-size: 11px;
+            font-weight: bold; display: flex; flex-direction: column;
+            align-items: center; min-width: 65px; gap: 4px;
+            box-shadow: 0 4px 0 #ccc;
+        }
+
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #ccc; }
+        .btn.gold { background: var(--accent); box-shadow: 0 4px 0 #b8860b; }
+
+        /* --- MESA --- */
+        .tableau { 
+            flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); 
+            gap: 3px; padding: 10px 5px; align-content: start;
+        }
 
         .slot {
             width: 100%; height: var(--card-h);
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.1);
             border-radius: var(--radius); position: relative;
-            background: rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.15);
         }
 
-        /* --- CARTAS --- */
         .card {
             width: 100%; height: var(--card-h);
             background: white; border-radius: var(--radius);
             position: absolute; color: black; display: flex;
-            flex-direction: column; padding: 3px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            font-size: 14px; font-weight: 800;
-            transition: transform 0.1s;
+            flex-direction: column; padding: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            font-size: 15px; font-weight: 900;
         }
 
         .card.red { color: #d32f2f; }
         .card.black { color: #1a1a1a; }
         .card.back {
             background: #2b5797; border: 2px solid white;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px);
+            background-image: radial-gradient(circle, #3b67a7, #1b4787);
         }
 
-        .card.dragging { z-index: 1000 !important; opacity: 0.8; transform: scale(1.1); pointer-events: none; }
+        .card.dragging { z-index: 2000 !important; opacity: 0.9; transform: scale(1.15); pointer-events: none; }
         
-        .hint-glow { 
-            box-shadow: 0 0 15px 5px var(--accent) !important;
-            animation: pulse 1s infinite;
+        .hint-pulse { 
+            box-shadow: 0 0 20px 8px #fff !important;
+            animation: pulse-border 0.8s infinite alternate;
         }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        @keyframes pulse-border { from { opacity: 1; } to { opacity: 0.4; } }
 
-        /* --- BARRA INFERIOR --- */
-        footer {
-            height: 80px; display: flex; justify-content: space-around;
-            align-items: center; background: rgba(0,0,0,0.5);
-            padding-bottom: env(safe-area-inset-bottom);
+        #mode-tag {
+            font-size: 10px; padding: 2px 6px; background: #fff; color: #000;
+            border-radius: 10px; margin-left: 10px; text-transform: uppercase;
         }
-
-        .btn {
-            background: #fff; border: none; color: #333;
-            padding: 10px; border-radius: 12px; font-size: 11px;
-            font-weight: bold; display: flex; flex-direction: column;
-            align-items: center; min-width: 70px; gap: 5px;
-        }
-
-        .btn.primary { background: var(--accent); }
-        .btn:active { transform: scale(0.9); opacity: 0.8; }
-
-        .suit-big { font-size: 20px; text-align: center; margin-top: auto; margin-bottom: auto; }
     </style>
 </head>
 <body>
 
     <header>
-        <span>PONTOS: <span id="score">0</span></span>
+        <div>PONTOS: <span id="score">0</span> <span id="mode-tag">Normal</span></div>
         <span>MOVIMENTOS: <span id="moves">0</span></span>
     </header>
 
-    <div class="game-grid">
+    <div class="top-row">
         <div id="stock" class="slot" onclick="drawCard()"></div>
         <div id="waste" class="slot"></div>
         <div class="slot" style="visibility: hidden;"></div>
@@ -110,6 +116,12 @@
         <div id="f-1" class="slot foundation" data-f="1"></div>
         <div id="f-2" class="slot foundation" data-f="2"></div>
         <div id="f-3" class="slot foundation" data-f="3"></div>
+    </div>
+
+    <div class="control-bar">
+        <button class="btn" onclick="undo()"><span>↩️</span>DESFAZER</button>
+        <button class="btn gold" onclick="giveHint()"><span>💡</span>IDEIAS</button>
+        <button class="btn" onclick="location.reload()"><span>🔄</span>NOVO</button>
     </div>
 
     <div class="tableau" id="tableau-root">
@@ -122,22 +134,26 @@
         <div id="t-6" class="slot col" data-t="6"></div>
     </div>
 
-    <footer>
-        <button class="btn" onclick="undo()"><span>↩️</span>DESFAZER</button>
-        <button class="btn primary" onclick="giveHint()"><span>💡</span>IDEIAS</button>
-        <button class="btn" onclick="location.reload()"><span>🔄</span>NOVO JOGO</button>
-    </footer>
-
     <script>
         const SUITS = ['♥', '♦', '♣', '♠'];
         const VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-        let G = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[],[],[],[]], score:0, moves:0, history:[] };
+        let G = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[],[],[],[]], score:0, moves:0, history:[], mode: 'clássico' };
         
         let dragItem = null;
         let dragData = null;
-        let startX, startY;
+        let diffConfig = { drawCount: 1 };
 
         function init() {
+            // "Gambiarra" de Dificuldade Aleatória
+            const modes = [
+                { name: 'Modo Sorte (Virar 1)', draw: 1, scoreMult: 1 },
+                { name: 'Modo Pro (Virar 3)', draw: 3, scoreMult: 2 },
+                { name: 'Modo Caótico', draw: 1, scoreMult: 1.5 }
+            ];
+            let chosen = modes[Math.floor(Math.random() * modes.length)];
+            diffConfig.drawCount = chosen.draw;
+            document.getElementById('mode-tag').innerText = chosen.name;
+
             let deck = [];
             SUITS.forEach(s => VALUES.forEach((v, i) => {
                 deck.push({ suit: s, value: v, rank: i+1, color: (s==='♥'||s==='♦')?'red':'black', hidden: true });
@@ -155,22 +171,10 @@
             render();
         }
 
-        function createCardUI(card, pType, pIdx, cIdx) {
-            const div = document.createElement('div');
-            div.className = `card ${card.hidden ? 'back' : card.color}`;
-            div.dataset.type = pType;
-            div.dataset.p = pIdx;
-            div.dataset.c = cIdx;
-            
-            if(!card.hidden) {
-                div.innerHTML = `<div>${card.value}${card.suit}</div><div class="suit-big">${card.suit}</div>`;
-                div.addEventListener('touchstart', onDragStart);
-            }
-            return div;
-        }
-
         function render() {
-            document.getElementById('stock').innerHTML = G.stock.length ? '<div class="card back"></div>' : '';
+            const s = document.getElementById('stock');
+            s.innerHTML = G.stock.length ? '<div class="card back"></div>' : '<div style="color:white; opacity:0.2; text-align:center; padding-top:15px; font-size:20px">🔄</div>';
+            
             const w = document.getElementById('waste');
             w.innerHTML = '';
             if(G.waste.length) w.appendChild(createCardUI(G.waste[G.waste.length-1], 'waste', 0, G.waste.length-1));
@@ -186,7 +190,7 @@
                 el.innerHTML = '';
                 t.forEach((c, idx) => {
                     const cardEl = createCardUI(c, 'tableau', i, idx);
-                    cardEl.style.top = (idx * 20) + 'px';
+                    cardEl.style.top = (idx * 22) + 'px';
                     el.appendChild(cardEl);
                 });
             });
@@ -194,27 +198,33 @@
             document.getElementById('moves').innerText = G.moves;
         }
 
-        // --- LÓGICA DE ARRASTAR (DRAG) ---
+        function createCardUI(card, pType, pIdx, cIdx) {
+            const div = document.createElement('div');
+            div.className = `card ${card.hidden ? 'back' : card.color}`;
+            div.dataset.type = pType; div.dataset.p = pIdx; div.dataset.c = cIdx;
+            
+            if(!card.hidden) {
+                div.innerHTML = `<div>${card.value}${card.suit}</div><div style="font-size:24px; margin:auto">${card.suit}</div><div style="transform:rotate(180deg); font-size:10px">${card.value}${card.suit}</div>`;
+                div.addEventListener('touchstart', onDragStart);
+            }
+            return div;
+        }
+
         function onDragStart(e) {
             const el = e.currentTarget;
             const type = el.dataset.type;
             const pIdx = parseInt(el.dataset.p);
             const cIdx = parseInt(el.dataset.c);
-            
-            // Só arrasta do Tableau se for a última ou sequência válida
+
             if(type === 'tableau') {
                 const pile = G.tableau[pIdx];
                 for(let i=cIdx; i<pile.length-1; i++) {
-                    if(pile[i].color === pile[i+1].color) return; // Não arrasta sequência errada
+                    if(pile[i].color === pile[i+1].color || pile[i].rank !== pile[i+1].rank + 1) return;
                 }
             }
 
             dragItem = el;
             dragData = { type, pIdx, cIdx };
-            const touch = e.touches[0];
-            startX = touch.clientX - el.offsetLeft;
-            startY = touch.clientY - el.offsetTop;
-            
             el.classList.add('dragging');
             document.addEventListener('touchmove', onDragMove, { passive: false });
             document.addEventListener('touchend', onDragEnd);
@@ -223,9 +233,9 @@
         function onDragMove(e) {
             e.preventDefault();
             const touch = e.touches[0];
-            dragItem.style.left = (touch.clientX - 30) + 'px';
-            dragItem.style.top = (touch.clientY - 40) + 'px';
             dragItem.style.position = 'fixed';
+            dragItem.style.left = (touch.clientX - 35) + 'px';
+            dragItem.style.top = (touch.clientY - 40) + 'px';
         }
 
         function onDragEnd(e) {
@@ -235,16 +245,11 @@
             dragItem.hidden = false;
 
             let targetSlot = dropTarget ? dropTarget.closest('.slot') : null;
-            
             if(targetSlot) {
                 const tIdx = parseInt(targetSlot.dataset.t);
                 const fIdx = parseInt(targetSlot.dataset.f);
-                
                 if(!isNaN(tIdx)) tryMove('tableau', tIdx);
                 else if(!isNaN(fIdx)) tryMove('foundation', fIdx);
-                else resetDrag();
-            } else {
-                resetDrag();
             }
 
             document.removeEventListener('touchmove', onDragMove);
@@ -254,36 +259,27 @@
             render();
         }
 
-        function resetDrag() {
-            dragItem.style.position = 'absolute';
-            dragItem.style.left = '0';
-            render();
-        }
-
-        // --- REGRAS REAIS ---
         function tryMove(toType, toIdx) {
             saveHistory();
             const from = dragData.type === 'tableau' ? G.tableau[dragData.pIdx] : G.waste;
-            const movingCards = dragData.type === 'tableau' ? from.slice(dragData.cIdx) : [from[from.length-1]];
+            const movingCards = from.slice(dragData.cIdx);
             const target = toType === 'tableau' ? G.tableau[toIdx] : G.foundations[toIdx];
             const top = target[target.length-1];
 
             let ok = false;
             if(toType === 'tableau') {
-                if(!top) ok = movingCards[0].rank === 13; // SÓ REI
+                if(!top) ok = movingCards[0].rank === 13;
                 else ok = movingCards[0].color !== top.color && movingCards[0].rank === top.rank - 1;
-            } else {
-                if(movingCards.length === 1) {
-                    if(!top) ok = movingCards[0].rank === 1; // SÓ ÁS
-                    else ok = movingCards[0].suit === top.suit && movingCards[0].rank === top.rank + 1;
-                }
+            } else if(movingCards.length === 1) {
+                if(!top) ok = movingCards[0].rank === 1;
+                else ok = movingCards[0].suit === top.suit && movingCards[0].rank === top.rank + 1;
             }
 
             if(ok) {
-                from.splice(dragData.cIdx, movingCards.length);
+                from.splice(dragData.cIdx);
                 target.push(...movingCards);
                 if(dragData.type === 'tableau' && from.length > 0) from[from.length-1].hidden = false;
-                G.moves++; G.score += (toType === 'foundation' ? 15 : 5);
+                G.moves++; G.score += (toType === 'foundation' ? 20 : 5);
             }
         }
 
@@ -293,48 +289,56 @@
                 G.stock = G.waste.reverse().map(c => ({...c, hidden: true}));
                 G.waste = [];
             } else {
-                let c = G.stock.pop(); c.hidden = false;
-                G.waste.push(c);
+                for(let i=0; i<diffConfig.drawCount; i++) {
+                    if(G.stock.length) {
+                        let c = G.stock.pop(); c.hidden = false;
+                        G.waste.push(c);
+                    }
+                }
             }
             G.moves++; render();
         }
 
-        // --- BOTÃO DE IDEIAS (HINT) ---
         function giveHint() {
-            let moves = [];
-            // Testa todas as cartas visíveis contra colunas e bases
-            const cands = [];
-            G.tableau.forEach((p, i) => { if(p.length) cands.push({c: p[p.length-1], type:'tableau', p:i}) });
-            if(G.waste.length) cands.push({c: G.waste[G.waste.length-1], type:'waste', p:0});
+            let options = [];
+            // Cartas das colunas
+            G.tableau.forEach((p, i) => { if(p.length) options.push({c: p[p.length-1], type:'tableau', p:i, cIdx: p.length-1}) });
+            // Carta do descarte
+            if(G.waste.length) options.push({c: G.waste[G.waste.length-1], type:'waste', p:0, cIdx: G.waste.length-1});
 
-            for(let cand of cands) {
-                // Tenta base
+            for(let opt of options) {
+                // Prioridade 1: Fundações
                 G.foundations.forEach((f, fi) => {
                     const top = f[f.length-1];
-                    if((!top && cand.c.rank===1) || (top && cand.c.suit===top.suit && cand.c.rank===top.rank+1)) 
-                        moves.push({from: cand, toId: `f-${fi}`});
-                });
-                // Tenta colunas
-                G.tableau.forEach((t, ti) => {
-                    const top = t[t.length-1];
-                    if(!top && cand.c.rank===13) moves.push({from: cand, toId: `t-${ti}`});
-                    else if(top && cand.c.color!==top.color && cand.c.rank===top.rank-1) moves.push({from: cand, toId: `t-${ti}`});
+                    if((!top && opt.c.rank===1) || (top && opt.c.suit===top.suit && opt.c.rank===top.rank+1)) {
+                        highlightHint(opt, `f-${fi}`); return;
+                    }
                 });
             }
+            // Prioridade 2: Mesa
+            for(let opt of options) {
+                G.tableau.forEach((t, ti) => {
+                    const top = t[t.length-1];
+                    if((!top && opt.c.rank===13 && (opt.type === 'waste' || G.tableau[opt.p].length > 1)) || 
+                       (top && opt.c.color!==top.color && opt.c.rank===top.rank-1)) {
+                        highlightHint(opt, `t-${ti}`); return;
+                    }
+                });
+            }
+        }
 
-            if(moves.length) {
-                const move = moves[0];
-                const cardEl = document.querySelector(`[data-type="${move.from.type}"][data-p="${move.from.p}"]`);
-                const destEl = document.getElementById(move.toId);
-                cardEl.classList.add('hint-glow');
-                destEl.classList.add('hint-glow');
-                setTimeout(() => { cardEl.classList.remove('hint-glow'); destEl.classList.remove('hint-glow'); }, 1500);
+        function highlightHint(from, toId) {
+            const cardEl = document.querySelector(`[data-type="${from.type}"][data-p="${from.p}"][data-c="${from.cIdx}"]`);
+            const destEl = document.getElementById(toId);
+            if(cardEl && destEl) {
+                cardEl.classList.add('hint-pulse'); destEl.classList.add('hint-pulse');
+                setTimeout(() => { cardEl.classList.remove('hint-pulse'); destEl.classList.remove('hint-pulse'); }, 1500);
             }
         }
 
         function saveHistory() {
             G.history.push(JSON.stringify({stock:G.stock, waste:G.waste, foundations:G.foundations, tableau:G.tableau, score:G.score, moves:G.moves}));
-            if(G.history.length > 15) G.history.shift();
+            if(G.history.length > 20) G.history.shift();
         }
 
         function undo() {
