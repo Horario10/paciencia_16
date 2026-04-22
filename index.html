@@ -3,287 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Paciência da Vovó - Cartas Gigantes</title>
+    <title>Paciência Fácil</title>
     <style>
         :root {
-            --felt: #1a472a;
-            --card-w: calc((100vw - 20px) / 7);
-            --card-h: calc(var(--card-w) * 1.5);
-            --accent: #ffd700;
+            --bg-color: #1e5c1a;
+            --card-bg: #ffffff;
+            --card-back: #2b4c7e;
+            --red-suit: #d92525;
+            --black-suit: #111111;
+            --highlight: #ffd700;
         }
 
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
-            user-select: none; touch-action: none;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* Evita zoom e seleção acidental em celulares */
+            font-family: Arial, sans-serif;
         }
 
         body {
-            background: var(--felt);
-            font-family: 'Arial Black', sans-serif;
-            height: 100vh; width: 100vw;
-            overflow: hidden; display: flex; flex-direction: column;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
         }
 
-        /* PLACAR NO TOPO */
         header {
-            height: 40px; display: flex; justify-content: space-around;
-            align-items: center; background: #000; color: #fff; font-size: 14px;
+            padding: 10px;
+            text-align: center;
+            background: rgba(0,0,0,0.2);
         }
 
-        /* ZONA DE CIMA (BARALHO E BASES) */
-        .top-row {
-            display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 2px; padding: 10px 5px; height: calc(var(--card-h) + 20px);
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
         }
 
-        /* BARRA DE BOTÕES (BEM NO MEIO) */
-        .btn-container {
-            display: flex; justify-content: space-evenly;
-            padding: 10px 0; background: rgba(0,0,0,0.3);
-            border-top: 3px solid var(--accent); border-bottom: 3px solid var(--accent);
+        button:active {
+            transform: scale(0.95);
         }
 
-        .vovo-btn {
-            background: #fff; color: #000; border: 2px solid #000;
-            padding: 12px 10px; border-radius: 12px; font-weight: 900;
-            font-size: 14px; min-width: 100px; box-shadow: 0 5px 0 #666;
+        #game-board {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 15px;
         }
 
-        .vovo-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #666; }
-        .vovo-btn.gold { background: var(--accent); }
-
-        /* ÁREA DAS COLUNAS */
-        .tableau { 
-            flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); 
-            gap: 2px; padding: 5px; position: relative;
+        .row {
+            display: flex;
+            justify-content: space-between;
+            height: 20vh; /* Altura responsiva */
         }
 
-        .slot {
-            width: 100%; height: 100%; position: relative;
-            background: rgba(255,255,255,0.05); border-radius: 5px;
+        .tableau-area {
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
         }
 
-        /* AS CARTAS - AGORA COM BORDAS FORTES */
+        .pile {
+            width: 13vw;
+            max-width: 60px;
+            height: 19vw;
+            max-height: 85px;
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 6px;
+            position: relative;
+        }
+
         .card {
-            width: 100%; height: var(--card-h);
-            background: #fff; border: 2px solid #000;
-            border-radius: 6px; position: absolute;
-            display: flex; flex-direction: column;
-            padding: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-            z-index: 10;
+            width: 13vw;
+            max-width: 60px;
+            height: 19vw;
+            max-height: 85px;
+            background-color: var(--card-bg);
+            border: 1px solid #999;
+            border-radius: 6px;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 1px 2px 4px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: border 0.2s;
         }
 
-        .card.red { color: #cc0000; }
-        .card.black { color: #000000; }
-
-        /* VERSO DA CARTA (AZULÃO) */
-        .card.back {
-            background: #0044cc;
-            background-image: repeating-linear-gradient(45deg, #0044cc, #0044cc 10px, #0033aa 10px, #0033aa 20px);
-            border: 2px solid #fff;
+        /* Cartas grandes para melhor visibilidade */
+        @media (min-width: 400px) {
+            .card { font-size: 24px; }
         }
 
-        .card.dragging { 
-            z-index: 999 !important; scale: 1.2; opacity: 0.9;
+        .card.face-down {
+            background-color: var(--card-back);
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px);
+            color: transparent;
+            border: 2px solid white;
         }
 
-        /* TEXTOS DA CARTA */
-        .card-value { font-size: 16px; line-height: 1; }
-        .card-suit { font-size: 28px; margin: auto; text-align: center; }
+        .card.red { color: var(--red-suit); }
+        .card.black { color: var(--black-suit); }
 
-        /* O BRILHO DA COLUNA (HITBOX) */
-        .lane-highlight {
-            position: absolute; inset: 0; background: rgba(255,215,0,0.2);
-            border: 3px solid var(--accent); display: none; z-index: 1;
+        .card.selected {
+            border: 4px solid var(--highlight);
+            transform: scale(1.05);
+            z-index: 100 !important;
         }
+
+        .card .suit-big {
+            font-size: 1.5em;
+            margin-top: -5px;
+        }
+
+        /* Espaçamento em cascata para o Tableau */
+        .tableau-pile .card { position: absolute; }
     </style>
 </head>
 <body>
 
     <header>
-        <b>PONTOS: <span id="score">0</span></b>
-        <b>MOVS: <span id="moves">0</span></b>
+        <button onclick="iniciarJogo()">Novo Jogo</button>
     </header>
 
-    <div class="top-row">
-        <div id="stock" class="slot" onclick="drawCard()"></div>
-        <div id="waste" class="slot"></div>
-        <div class="slot" style="visibility:hidden"></div>
-        <div id="f-0" class="slot" data-target="f0"></div>
-        <div id="f-1" class="slot" data-target="f1"></div>
-        <div id="f-2" class="slot" data-target="f2"></div>
-        <div id="f-3" class="slot" data-target="f3"></div>
-    </div>
+    <div id="game-board">
+        <div class="row" id="top-area">
+            <div style="display: flex; gap: 5px;">
+                <div id="stock" class="pile" onclick="comprarCarta()"></div>
+                <div id="waste" class="pile" onclick="selecionarDestino('waste')"></div>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <div id="found-0" class="pile" onclick="selecionarDestino('foundation', 0)"></div>
+                <div id="found-1" class="pile" onclick="selecionarDestino('foundation', 1)"></div>
+                <div id="found-2" class="pile" onclick="selecionarDestino('foundation', 2)"></div>
+                <div id="found-3" class="pile" onclick="selecionarDestino('foundation', 3)"></div>
+            </div>
+        </div>
 
-    <div class="btn-container">
-        <button class="vovo-btn" onclick="undo()">↩ VOLTAR</button>
-        <button class="vovo-btn gold" onclick="giveHint()">💡 DICA</button>
-        <button class="vovo-btn" onclick="location.reload()">🔄 NOVO</button>
-    </div>
-
-    <div class="tableau" id="tableau-root">
-        <div class="slot" data-target="t0"><div class="lane-highlight" id="h-t0"></div></div>
-        <div class="slot" data-target="t1"><div class="lane-highlight" id="h-t1"></div></div>
-        <div class="slot" data-target="t2"><div class="lane-highlight" id="h-t2"></div></div>
-        <div class="slot" data-target="t3"><div class="lane-highlight" id="h-t3"></div></div>
-        <div class="slot" data-target="t4"><div class="lane-highlight" id="h-t4"></div></div>
-        <div class="slot" data-target="t5"><div class="lane-highlight" id="h-t5"></div></div>
-        <div class="slot" data-target="t6"><div class="lane-highlight" id="h-t6"></div></div>
+        <div class="tableau-area" id="tableau-area">
+            <div id="tab-0" class="pile tableau-pile" onclick="selecionarDestino('tableau', 0)"></div>
+            <div id="tab-1" class="pile tableau-pile" onclick="selecionarDestino('tableau', 1)"></div>
+            <div id="tab-2" class="pile tableau-pile" onclick="selecionarDestino('tableau', 2)"></div>
+            <div id="tab-3" class="pile tableau-pile" onclick="selecionarDestino('tableau', 3)"></div>
+            <div id="tab-4" class="pile tableau-pile" onclick="selecionarDestino('tableau', 4)"></div>
+            <div id="tab-5" class="pile tableau-pile" onclick="selecionarDestino('tableau', 5)"></div>
+            <div id="tab-6" class="pile tableau-pile" onclick="selecionarDestino('tableau', 6)"></div>
+        </div>
     </div>
 
     <script>
-        const SUITS = ['♥', '♦', '♣', '♠'];
-        const VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-        let G = { stock:[], waste:[], foundations:[[],[],[],[]], tableau:[[],[],[],[],[],[],[]], score:0, moves:0, history:[] };
-        let dragItem = null, dragData = null;
+        const naipes = ['♥', '♦', '♣', '♠'];
+        const valores = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        
+        let estado = {
+            stock: [], waste: [], foundations: [[], [], [], []], tableau: [[], [], [], [], [], [], []]
+        };
+        let selecao = null; // Guarda a carta clicada
 
-        function init() {
-            let deck = [];
-            SUITS.forEach(s => VALUES.forEach((v, i) => {
-                deck.push({ suit: s, value: v, rank: i+1, color: (s==='♥'||s==='♦')?'red':'black', hidden: true });
-            }));
-            deck.sort(() => Math.random() - 0.5);
-
-            for(let i=0; i<7; i++) {
-                for(let j=0; j<=i; j++) {
-                    let card = deck.pop();
-                    if(j === i) card.hidden = false;
-                    G.tableau[i].push(card);
+        function criarBaralho() {
+            let baralho = [];
+            for (let n of naipes) {
+                for (let i = 0; i < valores.length; i++) {
+                    baralho.push({
+                        naipe: n, valor: i + 1, label: valores[i],
+                        cor: (n === '♥' || n === '♦') ? 'red' : 'black',
+                        virada: false
+                    });
                 }
             }
-            G.stock = deck;
-            render();
+            // Embaralhar (Fisher-Yates)
+            for (let i = baralho.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [baralho[i], baralho[j]] = [baralho[j], baralho[i]];
+            }
+            return baralho;
         }
 
-        function createCardUI(card, type, pIdx, cIdx) {
-            const div = document.createElement('div');
-            div.className = `card ${card.hidden ? 'back' : card.color}`;
-            if(!card.hidden) {
-                div.innerHTML = `<span class="card-value">${card.value}</span><span class="card-suit">${card.suit}</span>`;
-                div.dataset.type = type; div.dataset.p = pIdx; div.dataset.c = cIdx;
-                div.addEventListener('touchstart', onStart);
+        function iniciarJogo() {
+            let baralho = criarBaralho();
+            estado = { stock: [], waste: [], foundations: [[], [], [], []], tableau: [[], [], [], [], [], [], []] };
+            selecao = null;
+
+            // Distribuir para o Tableau
+            for (let i = 0; i < 7; i++) {
+                for (let j = 0; j <= i; j++) {
+                    let carta = baralho.pop();
+                    if (j === i) carta.virada = true;
+                    estado.tableau[i].push(carta);
+                }
             }
+            estado.stock = baralho;
+            renderizar();
+        }
+
+        function comprarCarta() {
+            selecao = null;
+            if (estado.stock.length > 0) {
+                let carta = estado.stock.pop();
+                carta.virada = true;
+                estado.waste.push(carta);
+            } else if (estado.waste.length > 0) {
+                estado.stock = estado.waste.reverse().map(c => ({ ...c, virada: false }));
+                estado.waste = [];
+            }
+            renderizar();
+        }
+
+        function selecionarCarta(evento, origem, colIndex, cardIndex) {
+            evento.stopPropagation();
+            let pilha = obterPilha(origem, colIndex);
+            let carta = pilha[cardIndex];
+
+            if (!carta.virada) return; // Não seleciona carta virada pra baixo
+
+            if (selecao && selecao.origem === origem && selecao.colIndex === colIndex && selecao.cardIndex === cardIndex) {
+                selecao = null; // Desmarcar
+            } else {
+                selecao = { origem, colIndex, cardIndex, carta };
+            }
+            renderizar();
+        }
+
+        function selecionarDestino(destino, colIndex = null) {
+            if (!selecao) return;
+
+            let pilhaDestino = obterPilha(destino, colIndex);
+            let pilhaOrigem = obterPilha(selecao.origem, selecao.colIndex);
+            let cartasMovidas = pilhaOrigem.slice(selecao.cardIndex);
+
+            if (movimentoValido(cartasMovidas[0], pilhaDestino, destino)) {
+                // Executar movimento
+                pilhaDestino.push(...cartasMovidas);
+                pilhaOrigem.splice(selecao.cardIndex);
+
+                // Virar a próxima carta do tableau, se houver
+                if (selecao.origem === 'tableau' && pilhaOrigem.length > 0) {
+                    pilhaOrigem[pilhaOrigem.length - 1].virada = true;
+                }
+                selecao = null;
+                verificarVitoria();
+            } else {
+                selecao = null; // Movimento inválido cancela a seleção
+            }
+            renderizar();
+        }
+
+        function obterPilha(tipo, index) {
+            if (tipo === 'waste') return estado.waste;
+            if (tipo === 'foundation') return estado.foundations[index];
+            if (tipo === 'tableau') return estado.tableau[index];
+        }
+
+        function movimentoValido(carta, pilhaDestino, destino) {
+            let topo = pilhaDestino[pilhaDestino.length - 1];
+
+            if (destino === 'foundation') {
+                // Só pode mover uma carta por vez para a fundação
+                if (selecao.origem === 'tableau' && selecao.cardIndex !== obterPilha('tableau', selecao.colIndex).length - 1) return false;
+                
+                if (!topo) return carta.valor === 1; // Ás primeiro
+                return carta.naipe === topo.naipe && carta.valor === topo.valor + 1;
+            }
+
+            if (destino === 'tableau') {
+                if (!topo) return carta.valor === 13; // Rei em espaço vazio
+                return carta.cor !== topo.cor && carta.valor === topo.valor - 1;
+            }
+            return false;
+        }
+
+        function criarElementoCarta(carta, origem, colIndex, cardIndex, cascata = 0) {
+            let div = document.createElement('div');
+            div.className = `card ${carta.virada ? carta.cor : 'face-down'}`;
+            if (selecao && selecao.origem === origem && selecao.colIndex === colIndex && selecao.cardIndex <= cardIndex) {
+                div.classList.add('selected');
+            }
+
+            if (carta.virada) {
+                div.innerHTML = `<span>${carta.label}</span><div class="suit-big">${carta.naipe}</div>`;
+            }
+
+            if (cascata > 0) {
+                // Espaçamento de 25px para mobile
+                div.style.top = `${cascata * 25}px`;
+                div.style.zIndex = cascata;
+            }
+
+            div.onclick = (e) => selecionarCarta(e, origem, colIndex, cardIndex);
             return div;
         }
 
-        function render() {
-            document.getElementById('stock').innerHTML = G.stock.length ? '<div class="card back"></div>' : '<div style="color:#fff;text-align:center;padding:20px">🔄</div>';
-            const w = document.getElementById('waste'); w.innerHTML = '';
-            if(G.waste.length) w.appendChild(createCardUI(G.waste[G.waste.length-1], 'waste', 0, G.waste.length-1));
-
-            for(let i=0; i<4; i++) {
-                const el = document.getElementById(`f-${i}`); el.innerHTML = '';
-                if(G.foundations[i].length) el.appendChild(createCardUI(G.foundations[i][G.foundations[i].length-1], 'foundation', i, G.foundations[i].length-1));
-                else el.innerHTML = `<div style="color:#fff;opacity:0.2;text-align:center;padding-top:10px">${SUITS[i]}</div>`;
+        function renderizar() {
+            // Renderizar Estoque
+            let stockDiv = document.getElementById('stock');
+            stockDiv.innerHTML = '';
+            if (estado.stock.length > 0) {
+                let carta = estado.stock[estado.stock.length - 1];
+                stockDiv.appendChild(criarElementoCarta(carta, 'stock', null, 0));
             }
 
-            for(let i=0; i<7; i++) {
-                const el = document.querySelector(`[data-target="t${i}"]`);
-                // Limpa tudo exceto o highlight
-                const highlight = el.querySelector('.lane-highlight');
-                el.innerHTML = ''; el.appendChild(highlight);
-                
-                G.tableau[i].forEach((c, idx) => {
-                    const cardEl = createCardUI(c, 'tableau', i, idx);
-                    cardEl.style.top = (idx * 28) + 'px'; // Cartas bem separadas
-                    el.appendChild(cardEl);
-                });
-            }
-            document.getElementById('score').innerText = G.score;
-            document.getElementById('moves').innerText = G.moves;
-        }
-
-        function onStart(e) {
-            dragItem = e.currentTarget;
-            dragData = { type: dragItem.dataset.type, pIdx: parseInt(dragItem.dataset.p), cIdx: parseInt(dragItem.dataset.c) };
-            dragItem.classList.add('dragging');
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onEnd);
-        }
-
-        function onMove(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            dragItem.style.position = 'fixed';
-            dragItem.style.left = (touch.clientX - 40) + 'px';
-            dragItem.style.top = (touch.clientY - 40) + 'px';
-
-            const colIdx = Math.floor(touch.clientX / (window.innerWidth / 7));
-            document.querySelectorAll('.lane-highlight').forEach(h => h.style.display = 'none');
-            const h = document.getElementById(`h-t${colIdx}`);
-            if(h) h.style.display = 'block';
-        }
-
-        function onEnd(e) {
-            const touch = e.changedTouches[0];
-            const colIdx = Math.floor(touch.clientX / (window.innerWidth / 7));
-            const isTop = touch.clientY < window.innerHeight * 0.35;
-
-            if(colIdx >= 0 && colIdx <= 6) {
-                if(isTop && colIdx >= 3) tryMove('foundation', colIdx - 3);
-                else tryMove('tableau', colIdx);
+            // Renderizar Descarte
+            let wasteDiv = document.getElementById('waste');
+            wasteDiv.innerHTML = '';
+            if (estado.waste.length > 0) {
+                let carta = estado.waste[estado.waste.length - 1];
+                wasteDiv.appendChild(criarElementoCarta(carta, 'waste', null, estado.waste.length - 1));
             }
 
-            document.querySelectorAll('.lane-highlight').forEach(h => h.style.display = 'none');
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('touchend', onEnd);
-            dragItem.classList.remove('dragging');
-            dragItem = null;
-            render();
-        }
-
-        function tryMove(toType, toIdx) {
-            save();
-            const from = dragData.type === 'tableau' ? G.tableau[dragData.pIdx] : G.waste;
-            const cards = from.slice(dragData.cIdx);
-            const target = toType === 'tableau' ? G.tableau[toIdx] : G.foundations[toIdx];
-            const top = target[target.length-1];
-
-            let ok = false;
-            if(toType === 'tableau') {
-                if(!top) ok = cards[0].rank === 13;
-                else ok = cards[0].color !== top.color && cards[0].rank === top.rank - 1;
-            } else if(cards.length === 1) {
-                if(!top) ok = cards[0].rank === 1;
-                else ok = cards[0].suit === top.suit && cards[0].rank === top.rank + 1;
-            }
-
-            if(ok) {
-                from.splice(dragData.cIdx);
-                target.push(...cards);
-                if(dragData.type === 'tableau' && from.length > 0) from[from.length-1].hidden = false;
-                G.moves++; G.score += 10;
-            }
-        }
-
-        function drawCard() {
-            save();
-            if(!G.stock.length) { G.stock = G.waste.reverse().map(c => ({...c, hidden:true})); G.waste = []; }
-            else { G.waste.push(Object.assign(G.stock.pop(), {hidden: false})); }
-            G.moves++; render();
-        }
-
-        function giveHint() {
-            // Brilha a primeira jogada possível
-            for(let i=0; i<7; i++){
-                if(G.tableau[i].length) {
-                    const h = document.getElementById(`h-t${i}`);
-                    h.style.display = 'block';
-                    setTimeout(() => h.style.display = 'none', 1000);
-                    return;
+            // Renderizar Fundações
+            for (let i = 0; i < 4; i++) {
+                let foundDiv = document.getElementById(`found-${i}`);
+                foundDiv.innerHTML = '';
+                if (estado.foundations[i].length > 0) {
+                    let carta = estado.foundations[i][estado.foundations[i].length - 1];
+                    foundDiv.appendChild(criarElementoCarta(carta, 'foundation', i, estado.foundations[i].length - 1));
                 }
             }
+
+            // Renderizar Tableau
+            for (let i = 0; i < 7; i++) {
+                let tabDiv = document.getElementById(`tab-${i}`);
+                tabDiv.innerHTML = '';
+                estado.tableau[i].forEach((carta, index) => {
+                    tabDiv.appendChild(criarElementoCarta(carta, 'tableau', i, index, index));
+                });
+            }
         }
 
-        function save() {
-            G.history.push(JSON.stringify({stock:G.stock, waste:G.waste, foundations:G.foundations, tableau:G.tableau, score:G.score, moves:G.moves}));
-            if(G.history.length > 15) G.history.shift();
+        function verificarVitoria() {
+            let totalFundacao = estado.foundations.reduce((acc, f) => acc + f.length, 0);
+            if (totalFundacao === 52) {
+                setTimeout(() => { alert("Parabéns! Você venceu a partida!"); }, 300);
+            }
         }
 
-        function undo() { if(G.history.length) { G = JSON.parse(G.history.pop()); render(); } }
-
-        init();
+        window.onload = iniciarJogo;
     </script>
 </body>
 </html>
