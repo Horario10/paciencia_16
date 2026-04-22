@@ -1,356 +1,722 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Paciência Fácil</title>
-    <style>
-        :root {
-            --bg-color: #1e5c1a;
-            --card-bg: #ffffff;
-            --card-back: #2b4c7e;
-            --red-suit: #d92525;
-            --black-suit: #111111;
-            --highlight: #ffd700;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paciência</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --felt: #1a6b3c;
+    --felt-dark: #124d2c;
+    --felt-light: #217a47;
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --card-w: 80px;
+    --card-h: 112px;
+    --card-radius: 8px;
+    --red: #c0202a;
+    --black: #1a1a1a;
+  }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none; /* Evita zoom e seleção acidental em celulares */
-            font-family: Arial, sans-serif;
-        }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
+  body {
+    background: var(--felt-dark);
+    background-image:
+      radial-gradient(ellipse at 60% 30%, #1e7a46 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, #0e4222 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23ffffff08'/%3E%3C/svg%3E");
+    min-height: 100vh;
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    overflow-x: hidden;
+    user-select: none;
+  }
 
-        header {
-            padding: 10px;
-            text-align: center;
-            background: rgba(0,0,0,0.2);
-        }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: rgba(0,0,0,0.35);
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+    backdrop-filter: blur(4px);
+  }
 
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: 2px solid white;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
+  .title {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
 
-        button:active {
-            transform: scale(0.95);
-        }
+  .score-box {
+    display: flex; gap: 24px;
+  }
+  .score-item {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+  }
+  .score-item span {
+    display: block;
+    font-size: 20px;
+    color: var(--gold-light);
+    font-weight: 700;
+  }
 
-        #game-board {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            gap: 15px;
-        }
+  .btn-bar {
+    display: flex;
+    gap: 10px;
+  }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            height: 20vh; /* Altura responsiva */
-        }
+  button.btn {
+    background: linear-gradient(145deg, #2a2a2a, #111);
+    border: 1px solid rgba(201,168,76,0.5);
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  button.btn:hover {
+    background: linear-gradient(145deg, #3a3a2a, #222211);
+    border-color: var(--gold);
+    color: var(--gold-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 8px rgba(201,168,76,0.2);
+  }
+  button.btn:active { transform: translateY(0); }
+  button.btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+  button.btn.hint-btn { border-color: rgba(100,200,100,0.5); color: #8de89d; }
+  button.btn.hint-btn:hover { border-color: #8de89d; color: #b2f5bc; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 8px rgba(100,200,100,0.2); }
 
-        .tableau-area {
-            display: flex;
-            justify-content: space-between;
-            flex: 1;
-        }
+  #game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 10px 30px;
+  }
 
-        .pile {
-            width: 13vw;
-            max-width: 60px;
-            height: 19vw;
-            max-height: 85px;
-            border: 2px dashed rgba(255,255,255,0.3);
-            border-radius: 6px;
-            position: relative;
-        }
+  .top-row, .tableau-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
 
-        .card {
-            width: 13vw;
-            max-width: 60px;
-            height: 19vw;
-            max-height: 85px;
-            background-color: var(--card-bg);
-            border: 1px solid #999;
-            border-radius: 6px;
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            box-shadow: 1px 2px 4px rgba(0,0,0,0.4);
-            cursor: pointer;
-            transition: border 0.2s;
-        }
+  .top-row { width: 100%; max-width: 680px; justify-content: space-between; }
 
-        /* Cartas grandes para melhor visibilidade */
-        @media (min-width: 400px) {
-            .card { font-size: 24px; }
-        }
+  .card-slot {
+    width: var(--card-w);
+    height: var(--card-h);
+    border: 2px dashed rgba(255,255,255,0.18);
+    border-radius: var(--card-radius);
+    background: rgba(0,0,0,0.18);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .card-slot.foundation {
+    border-color: rgba(201,168,76,0.3);
+    background: rgba(0,0,0,0.22);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; color: rgba(201,168,76,0.25);
+  }
 
-        .card.face-down {
-            background-color: var(--card-back);
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px);
-            color: transparent;
-            border: 2px solid white;
-        }
+  .stock-pile {
+    cursor: pointer;
+    border-color: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: rgba(255,255,255,0.18);
+    transition: all 0.15s;
+  }
+  .stock-pile:hover { border-color: rgba(255,255,255,0.5); background: rgba(0,0,0,0.3); }
 
-        .card.red { color: var(--red-suit); }
-        .card.black { color: var(--black-suit); }
+  .waste-pile { border-style: solid; border-color: rgba(255,255,255,0.1); }
 
-        .card.selected {
-            border: 4px solid var(--highlight);
-            transform: scale(1.05);
-            z-index: 100 !important;
-        }
+  /* CARDS */
+  .card {
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: var(--card-radius);
+    position: absolute;
+    cursor: pointer;
+    transition: box-shadow 0.1s, transform 0.1s;
+    will-change: transform;
+  }
+  .card.face-down {
+    background:
+      repeating-linear-gradient(45deg, #1a3a8a 0px, #1a3a8a 4px, #1a4aaa 4px, #1a4aaa 8px);
+    border: 2px solid rgba(255,255,255,0.15);
+    box-shadow: 1px 2px 6px rgba(0,0,0,0.5), inset 0 0 0 3px rgba(255,255,255,0.07);
+  }
+  .card.face-up {
+    background: #faf8f2;
+    border: 1.5px solid rgba(0,0,0,0.18);
+    box-shadow: 1px 3px 8px rgba(0,0,0,0.45);
+  }
+  .card.face-up.red .corner-tl,
+  .card.face-up.red .corner-br { color: var(--red); }
+  .card.face-up.black .corner-tl,
+  .card.face-up.black .corner-br { color: var(--black); }
 
-        .card .suit-big {
-            font-size: 1.5em;
-            margin-top: -5px;
-        }
+  .corner-tl {
+    position: absolute; top: 4px; left: 6px;
+    display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+    font-size: 14px; font-weight: 700;
+  }
+  .corner-tl .suit-small { font-size: 10px; }
+  .corner-br {
+    position: absolute; bottom: 4px; right: 6px;
+    display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+    font-size: 14px; font-weight: 700;
+    transform: rotate(180deg);
+  }
+  .corner-br .suit-small { font-size: 10px; }
+  .center-suit {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-size: 32px;
+  }
 
-        /* Espaçamento em cascata para o Tableau */
-        .tableau-pile .card { position: absolute; }
-    </style>
+  .card.selected {
+    box-shadow: 0 0 0 3px #ffe066, 0 4px 16px rgba(0,0,0,0.6) !important;
+    transform: translateY(-6px);
+    z-index: 200 !important;
+  }
+  .card.hint-glow {
+    box-shadow: 0 0 0 3px #5efa8a, 0 4px 18px rgba(80,250,130,0.5) !important;
+    animation: hintPulse 0.6s ease-in-out 3;
+  }
+  @keyframes hintPulse {
+    0%,100% { box-shadow: 0 0 0 3px #5efa8a, 0 4px 18px rgba(80,250,130,0.5); }
+    50% { box-shadow: 0 0 0 6px #5efa8a, 0 6px 28px rgba(80,250,130,0.8); }
+  }
+
+  .tableau-col {
+    position: relative;
+    width: var(--card-w);
+    flex-shrink: 0;
+  }
+
+  .empty-drop-hint {
+    position: absolute; top: 0; left: 0;
+    width: var(--card-w); height: var(--card-h);
+    border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: var(--card-radius);
+    pointer-events: none;
+  }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(60px);
+    background: rgba(0,0,0,0.8); border: 1px solid var(--gold);
+    color: var(--gold-light); font-size: 15px; letter-spacing: 1px;
+    padding: 12px 28px; border-radius: 30px; pointer-events: none;
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.35s;
+    opacity: 0; z-index: 9999;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  .win-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9000;
+    background: radial-gradient(ellipse at center, rgba(10,40,20,0.97) 0%, rgba(5,20,10,0.99) 100%);
+    align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+  }
+  .win-overlay.active { display: flex; }
+  .win-title {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 52px; color: var(--gold); letter-spacing: 6px;
+    text-shadow: 0 0 30px rgba(201,168,76,0.6);
+    animation: winPop 0.6s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes winPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .win-score { font-size: 18px; color: rgba(255,255,255,0.6); }
+  .win-score span { color: var(--gold-light); font-size: 22px; font-weight: 700; }
+
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px;
+    top: -20px; border-radius: 2px;
+    animation: confettiFall linear forwards;
+    pointer-events: none; z-index: 9001;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 640px) {
+    :root { --card-w: 56px; --card-h: 80px; --card-radius: 5px; }
+    .title { font-size: 18px; }
+    .corner-tl { font-size: 10px; top: 2px; left: 3px; }
+    .corner-br { font-size: 10px; bottom: 2px; right: 3px; }
+    .corner-tl .suit-small, .corner-br .suit-small { font-size: 7px; }
+    .center-suit { font-size: 22px; }
+    header { padding: 10px 12px; }
+    button.btn { padding: 7px 11px; font-size: 11px; }
+    .score-item { font-size: 9px; }
+    .score-item span { font-size: 15px; }
+  }
+</style>
 </head>
 <body>
 
-    <header>
-        <button onclick="iniciarJogo()">Novo Jogo</button>
-    </header>
+<header>
+  <div class="title">♠ Paciência ♥</div>
+  <div class="score-box">
+    <div class="score-item">Pontos<span id="score">0</span></div>
+    <div class="score-item">Movimentos<span id="moves">0</span></div>
+  </div>
+  <div class="btn-bar">
+    <button class="btn" id="btn-undo">↩ Desfazer</button>
+    <button class="btn hint-btn" id="btn-hint">💡 Dica</button>
+    <button class="btn" id="btn-new">✦ Novo Jogo</button>
+  </div>
+</header>
 
-    <div id="game-board">
-        <div class="row" id="top-area">
-            <div style="display: flex; gap: 5px;">
-                <div id="stock" class="pile" onclick="comprarCarta()"></div>
-                <div id="waste" class="pile" onclick="selecionarDestino('waste')"></div>
-            </div>
-            <div style="display: flex; gap: 5px;">
-                <div id="found-0" class="pile" onclick="selecionarDestino('foundation', 0)"></div>
-                <div id="found-1" class="pile" onclick="selecionarDestino('foundation', 1)"></div>
-                <div id="found-2" class="pile" onclick="selecionarDestino('foundation', 2)"></div>
-                <div id="found-3" class="pile" onclick="selecionarDestino('foundation', 3)"></div>
-            </div>
-        </div>
+<div id="game">
+  <div class="top-row" id="top-row"></div>
+  <div class="tableau-row" id="tableau-row"></div>
+</div>
 
-        <div class="tableau-area" id="tableau-area">
-            <div id="tab-0" class="pile tableau-pile" onclick="selecionarDestino('tableau', 0)"></div>
-            <div id="tab-1" class="pile tableau-pile" onclick="selecionarDestino('tableau', 1)"></div>
-            <div id="tab-2" class="pile tableau-pile" onclick="selecionarDestino('tableau', 2)"></div>
-            <div id="tab-3" class="pile tableau-pile" onclick="selecionarDestino('tableau', 3)"></div>
-            <div id="tab-4" class="pile tableau-pile" onclick="selecionarDestino('tableau', 4)"></div>
-            <div id="tab-5" class="pile tableau-pile" onclick="selecionarDestino('tableau', 5)"></div>
-            <div id="tab-6" class="pile tableau-pile" onclick="selecionarDestino('tableau', 6)"></div>
-        </div>
-    </div>
+<div class="toast" id="toast"></div>
+<div class="win-overlay" id="win-overlay">
+  <div class="win-title">Parabéns!</div>
+  <div class="win-score">Pontuação final: <span id="win-score-val">0</span></div>
+  <button class="btn" id="btn-win-new" style="margin-top:10px;font-size:16px;padding:12px 32px;">Novo Jogo</button>
+</div>
 
-    <script>
-        const naipes = ['♥', '♦', '♣', '♠'];
-        const valores = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-        
-        let estado = {
-            stock: [], waste: [], foundations: [[], [], [], []], tableau: [[], [], [], [], [], [], []]
-        };
-        let selecao = null; // Guarda a carta clicada
+<script>
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RED_SUITS = new Set(['♥','♦']);
+const SUIT_SYMBOLS = { '♠':'♠','♥':'♥','♦':'♦','♣':'♣' };
 
-        function criarBaralho() {
-            let baralho = [];
-            for (let n of naipes) {
-                for (let i = 0; i < valores.length; i++) {
-                    baralho.push({
-                        naipe: n, valor: i + 1, label: valores[i],
-                        cor: (n === '♥' || n === '♦') ? 'red' : 'black',
-                        virada: false
-                    });
-                }
-            }
-            // Embaralhar (Fisher-Yates)
-            for (let i = baralho.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [baralho[i], baralho[j]] = [baralho[j], baralho[i]];
-            }
-            return baralho;
+let stock=[], waste=[], foundations=[[],[],[],[]], tableau=[[],[],[],[],[],[],[]];
+let selected=null; // {pile, pileType, index, cards}
+let history=[];
+let score=0, moves=0;
+
+function makeCard(rank,suit){ return {rank,suit,faceUp:false}; }
+function isRed(c){ return RED_SUITS.has(c.suit); }
+function rankIdx(r){ return RANKS.indexOf(r); }
+
+function newDeck(){
+  const d=[];
+  for(const s of SUITS) for(const r of RANKS) d.push(makeCard(r,s));
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+
+function initGame(){
+  const deck=newDeck();
+  stock=[...deck]; waste=[]; foundations=[[],[],[],[]]; tableau=[[],[],[],[],[],[],[]];
+  selected=null; history=[]; score=0; moves=0;
+  for(let i=0;i<7;i++) for(let j=0;j<i+1;j++){ const c=stock.pop(); c.faceUp=(j===i); tableau[i].push(c); }
+  render(); updateScoreboard();
+}
+
+function saveHistory(){
+  history.push({
+    stock: deepClone(stock), waste: deepClone(waste),
+    foundations: deepClone(foundations), tableau: deepClone(tableau),
+    score, moves
+  });
+  if(history.length>50) history.shift();
+}
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+function undo(){
+  if(!history.length){ toast('Nada para desfazer'); return; }
+  const s=history.pop();
+  stock=s.stock; waste=s.waste; foundations=s.foundations; tableau=s.tableau;
+  score=s.score; moves=s.moves; selected=null;
+  render(); updateScoreboard();
+}
+
+function updateScoreboard(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('moves').textContent=moves;
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+/* ---- RENDERING ---- */
+function render(){
+  renderTopRow();
+  renderTableau();
+  selected=null;
+}
+
+function renderTopRow(){
+  const row=document.getElementById('top-row');
+  row.innerHTML='';
+
+  // Stock
+  const stockSlot=document.createElement('div');
+  stockSlot.className='card-slot stock-pile';
+  stockSlot.title='Comprar carta';
+  if(stock.length>0){
+    const cb=cardBack(); stockSlot.appendChild(cb);
+  } else {
+    stockSlot.innerHTML='<span style="font-size:26px;opacity:.3">↺</span>';
+  }
+  stockSlot.addEventListener('click',()=>{ clickStock(); });
+  row.appendChild(stockSlot);
+
+  // Waste
+  const wasteSlot=document.createElement('div');
+  wasteSlot.className='card-slot waste-pile'; wasteSlot.style.position='relative';
+  if(waste.length>0){
+    const c=waste[waste.length-1];
+    const el=renderCardEl(c,true);
+    el.style.position='absolute'; el.style.top='0'; el.style.left='0';
+    if(selected && selected.pileType==='waste') el.classList.add('selected');
+    el.addEventListener('click',()=>clickCard('waste',-1,null));
+    wasteSlot.appendChild(el);
+  }
+  row.appendChild(wasteSlot);
+
+  // Spacer
+  const sp=document.createElement('div'); sp.style.flex='1'; row.appendChild(sp);
+
+  // Foundations
+  const FSYMBOLS=['♠','♥','♦','♣'];
+  for(let i=0;i<4;i++){
+    const fSlot=document.createElement('div');
+    fSlot.className='card-slot foundation';
+    fSlot.dataset.foundation=i;
+    if(foundations[i].length===0){
+      fSlot.innerHTML=`<span>${FSYMBOLS[i]}</span>`;
+    } else {
+      const c=foundations[i][foundations[i].length-1];
+      const el=renderCardEl(c,true);
+      el.style.position='absolute'; el.style.top='0'; el.style.left='0';
+      el.addEventListener('click',()=>{}); // just display
+      fSlot.appendChild(el);
+    }
+    fSlot.addEventListener('click',()=>dropFoundation(i));
+    row.appendChild(fSlot);
+  }
+}
+
+function renderTableau(){
+  const row=document.getElementById('tableau-row');
+  row.innerHTML='';
+  for(let i=0;i<7;i++){
+    const col=document.createElement('div');
+    col.className='tableau-col';
+    const hint=document.createElement('div'); hint.className='empty-drop-hint'; col.appendChild(hint);
+    col.dataset.col=i;
+    col.style.minHeight=`${112}px`;
+    col.addEventListener('click',()=>{
+      if(selected && tableau[i].length===0) dropTableau(i,0);
+    });
+
+    const pile=tableau[i];
+    for(let j=0;j<pile.length;j++){
+      const c=pile[j];
+      const el=renderCardEl(c,c.faceUp);
+      el.style.top=`${j*28}px`;
+      el.style.zIndex=j+1;
+      if(selected && selected.pileType==='tableau' && selected.pile===i && j>=selected.index) el.classList.add('selected');
+      const ci=j, colI=i;
+      el.addEventListener('click',()=>clickCard('tableau',colI,ci));
+      col.appendChild(el);
+    }
+    col.style.height=`${Math.max(112, pile.length*28+112)}px`;
+    row.appendChild(col);
+  }
+}
+
+function cardBack(){
+  const el=document.createElement('div');
+  el.className='card face-down';
+  el.style.position='absolute'; el.style.top='0'; el.style.left='0';
+  return el;
+}
+
+function renderCardEl(c, faceUp){
+  const el=document.createElement('div');
+  el.className='card '+(faceUp?'face-up':'face-down');
+  if(faceUp){
+    el.classList.add(isRed(c)?'red':'black');
+    el.innerHTML=`
+      <div class="corner-tl">${c.rank}<div class="suit-small">${c.suit}</div></div>
+      <div class="center-suit">${c.suit}</div>
+      <div class="corner-br">${c.rank}<div class="suit-small">${c.suit}</div></div>`;
+  }
+  return el;
+}
+
+/* ---- GAME LOGIC ---- */
+function clickStock(){
+  saveHistory();
+  if(stock.length>0){
+    const c=stock.pop(); c.faceUp=true; waste.push(c);
+    score=Math.max(0,score-2); moves++;
+  } else {
+    // Recycle
+    while(waste.length){ const c=waste.pop(); c.faceUp=false; stock.push(c); }
+    score=Math.max(0,score-100); moves++;
+    toast('Cartas recicladas');
+  }
+  selected=null; render(); updateScoreboard();
+}
+
+function clickCard(pileType, pile, index){
+  if(pileType==='waste'){
+    if(waste.length===0) return;
+    if(selected){
+      // try move waste->foundation or waste->tableau automatically
+      if(tryAutoMove('waste',-1,null)) return;
+      selected=null; render(); return;
+    }
+    selected={pileType:'waste', pile:-1, index:waste.length-1, cards:[waste[waste.length-1]]};
+    render();
+    return;
+  }
+  if(pileType==='tableau'){
+    const card=tableau[pile][index];
+    if(!card.faceUp){
+      if(index===tableau[pile].length-1){ flipCard(pile); } 
+      return;
+    }
+    if(selected){
+      if(selected.pileType==='tableau' && selected.pile===pile){
+        selected=null; render(); return;
+      }
+      // Try drop
+      if(canDropTableau(pile, selected.cards)){
+        doDropTableau(pile); return;
+      } else {
+        selected=null; render();
+        // re-select new card
+        selected={pileType:'tableau', pile, index, cards:tableau[pile].slice(index)};
+        render(); return;
+      }
+    }
+    selected={pileType:'tableau', pile, index, cards:tableau[pile].slice(index)};
+    render();
+  }
+}
+
+function flipCard(colI){
+  saveHistory();
+  const col=tableau[colI];
+  if(col.length>0 && !col[col.length-1].faceUp){
+    col[col.length-1].faceUp=true;
+    score+=5; moves++;
+    render(); updateScoreboard();
+  }
+}
+
+function dropFoundation(i){
+  if(!selected) return;
+  const cards=selected.cards;
+  if(cards.length!==1){ toast('Apenas uma carta por vez para a fundação'); return; }
+  const c=cards[0];
+  const f=foundations[i];
+  const ok = (f.length===0 && c.rank==='A' && SUITS[i]===c.suit) ||
+              (f.length>0 && f[f.length-1].suit===c.suit && rankIdx(c.rank)===rankIdx(f[f.length-1].rank)+1);
+  if(!ok){ toast('Movimento inválido'); selected=null; render(); return; }
+  saveHistory();
+  removePicked();
+  foundations[i].push(c);
+  score+=10; moves++;
+  selected=null; render(); updateScoreboard();
+  checkWin();
+}
+
+function dropTableau(colI){
+  if(!selected) return;
+  if(canDropTableau(colI, selected.cards)) doDropTableau(colI);
+  else { toast('Movimento inválido'); selected=null; render(); }
+}
+
+function canDropTableau(colI, cards){
+  const col=tableau[colI];
+  const first=cards[0];
+  if(col.length===0) return first.rank==='K';
+  const top=col[col.length-1];
+  return top.faceUp && isRed(top)!==isRed(first) && rankIdx(top.rank)===rankIdx(first.rank)+1;
+}
+
+function doDropTableau(colI){
+  saveHistory();
+  const cards=selected.cards;
+  removePicked();
+  tableau[colI].push(...cards);
+  score+=5; moves++;
+  selected=null; render(); updateScoreboard();
+}
+
+function tryAutoMove(pileType, pile, index){
+  if(!selected) return false;
+  // try foundation first
+  const cards=selected.cards;
+  if(cards.length===1){
+    for(let i=0;i<4;i++){
+      const f=foundations[i];
+      const c=cards[0];
+      if((f.length===0 && c.rank==='A' && SUITS[i]===c.suit) ||
+         (f.length>0 && f[f.length-1].suit===c.suit && rankIdx(c.rank)===rankIdx(f[f.length-1].rank)+1)){
+        saveHistory();
+        removePicked();
+        foundations[i].push(c);
+        score+=10; moves++;
+        selected=null; render(); updateScoreboard(); checkWin(); return true;
+      }
+    }
+  }
+  return false;
+}
+
+function removePicked(){
+  const s=selected;
+  if(s.pileType==='waste'){ waste.pop(); }
+  else if(s.pileType==='tableau'){ tableau[s.pile].splice(s.index); }
+}
+
+function checkWin(){
+  if(foundations.every(f=>f.length===13)){
+    document.getElementById('win-score-val').textContent=score;
+    document.getElementById('win-overlay').classList.add('active');
+    launchConfetti();
+  }
+}
+
+/* HINT */
+function hint(){
+  // Find a valid move
+  const moves_list=[];
+  // waste -> foundation
+  if(waste.length>0){
+    const c=waste[waste.length-1];
+    for(let i=0;i<4;i++){
+      const f=foundations[i];
+      if((f.length===0&&c.rank==='A'&&SUITS[i]===c.suit)||(f.length>0&&f[f.length-1].suit===c.suit&&rankIdx(c.rank)===rankIdx(f[f.length-1].rank)+1)){
+        moves_list.push({from:'waste',to:'foundation',fi:i,card:c});
+      }
+    }
+  }
+  // tableau -> foundation
+  for(let ci=0;ci<7;ci++){
+    const col=tableau[ci];
+    if(!col.length) continue;
+    const c=col[col.length-1]; if(!c.faceUp) continue;
+    for(let i=0;i<4;i++){
+      const f=foundations[i];
+      if((f.length===0&&c.rank==='A'&&SUITS[i]===c.suit)||(f.length>0&&f[f.length-1].suit===c.suit&&rankIdx(c.rank)===rankIdx(f[f.length-1].rank)+1)){
+        moves_list.push({from:'tableau',fromCol:ci,to:'foundation',card:c});
+      }
+    }
+  }
+  // waste -> tableau
+  if(waste.length>0){
+    const c=waste[waste.length-1];
+    for(let ci=0;ci<7;ci++){
+      if(canDropTableau(ci,[c])) moves_list.push({from:'waste',to:'tableau',toCol:ci,card:c});
+    }
+  }
+  // tableau -> tableau (only top cards for simplicity)
+  for(let si=0;si<7;si++){
+    const col=tableau[si]; if(!col.length) continue;
+    // find first face-up
+    let firstFU=col.findIndex(c=>c.faceUp);
+    if(firstFU<0) continue;
+    for(let idx=firstFU;idx<col.length;idx++){
+      const cards=col.slice(idx);
+      for(let di=0;di<7;di++){
+        if(di===si) continue;
+        if(canDropTableau(di,cards)) moves_list.push({from:'tableau',fromCol:si,to:'tableau',toCol:di,card:cards[0]});
+      }
+    }
+  }
+
+  if(!moves_list.length){ toast('Nenhum movimento disponível'); return; }
+  const m=moves_list[0];
+  // highlight card
+  selected=null; render();
+  // glow the card
+  let el=null;
+  if(m.from==='waste'){
+    const wasteSlot=document.querySelector('.waste-pile');
+    if(wasteSlot) el=wasteSlot.querySelector('.card');
+  } else if(m.from==='tableau'){
+    const cols=document.querySelectorAll('.tableau-col');
+    const col=cols[m.fromCol];
+    if(col){
+      const cards=[...col.querySelectorAll('.card')];
+      // find card element matching rank+suit
+      for(const ce of cards){
+        if(ce.querySelector('.corner-tl') && ce.querySelector('.corner-tl').textContent.includes(m.card.rank)){
+          el=ce; break;
         }
+      }
+    }
+  }
+  if(el){ el.classList.add('hint-glow'); setTimeout(()=>el.classList.remove('hint-glow'),2000); }
+  toast(`Dica: mova ${m.card.rank}${m.card.suit} → ${m.to==='foundation'?'Fundação':'Tableau'}`);
+}
 
-        function iniciarJogo() {
-            let baralho = criarBaralho();
-            estado = { stock: [], waste: [], foundations: [[], [], [], []], tableau: [[], [], [], [], [], [], []] };
-            selecao = null;
+/* CONFETTI */
+function launchConfetti(){
+  const colors=['#c9a84c','#f0d080','#ff6b6b','#5efa8a','#60a0ff','#fff'];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='confetti-piece';
+      p.style.left=Math.random()*100+'vw';
+      p.style.background=colors[Math.floor(Math.random()*colors.length)];
+      p.style.animationDuration=(1.5+Math.random()*2)+'s';
+      p.style.animationDelay=(Math.random()*1)+'s';
+      p.style.transform=`rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(p);
+      setTimeout(()=>p.remove(),4000);
+    },i*30);
+  }
+}
 
-            // Distribuir para o Tableau
-            for (let i = 0; i < 7; i++) {
-                for (let j = 0; j <= i; j++) {
-                    let carta = baralho.pop();
-                    if (j === i) carta.virada = true;
-                    estado.tableau[i].push(carta);
-                }
-            }
-            estado.stock = baralho;
-            renderizar();
-        }
+/* DOUBLE-CLICK auto-send to foundation */
+document.addEventListener('dblclick', e=>{
+  const cardEl=e.target.closest('.card.face-up');
+  if(!cardEl) return;
+  // figure out where it is
+  const wasteSlot=cardEl.closest('.waste-pile');
+  const tabCol=cardEl.closest('.tableau-col');
+  if(wasteSlot && waste.length>0){
+    selected={pileType:'waste',pile:-1,index:waste.length-1,cards:[waste[waste.length-1]]};
+    if(!tryAutoMove()) { selected=null; }
+  } else if(tabCol){
+    const colI=parseInt(tabCol.dataset.col);
+    const col=tableau[colI]; if(!col.length) return;
+    const c=col[col.length-1]; if(!c.faceUp) return;
+    selected={pileType:'tableau',pile:colI,index:col.length-1,cards:[c]};
+    if(!tryAutoMove()) { selected=null; }
+  }
+});
 
-        function comprarCarta() {
-            selecao = null;
-            if (estado.stock.length > 0) {
-                let carta = estado.stock.pop();
-                carta.virada = true;
-                estado.waste.push(carta);
-            } else if (estado.waste.length > 0) {
-                estado.stock = estado.waste.reverse().map(c => ({ ...c, virada: false }));
-                estado.waste = [];
-            }
-            renderizar();
-        }
+document.getElementById('btn-new').addEventListener('click',()=>{ document.getElementById('win-overlay').classList.remove('active'); initGame(); });
+document.getElementById('btn-undo').addEventListener('click',undo);
+document.getElementById('btn-hint').addEventListener('click',hint);
+document.getElementById('btn-win-new').addEventListener('click',()=>{ document.getElementById('win-overlay').classList.remove('active'); initGame(); });
 
-        function selecionarCarta(evento, origem, colIndex, cardIndex) {
-            evento.stopPropagation();
-            let pilha = obterPilha(origem, colIndex);
-            let carta = pilha[cardIndex];
-
-            if (!carta.virada) return; // Não seleciona carta virada pra baixo
-
-            if (selecao && selecao.origem === origem && selecao.colIndex === colIndex && selecao.cardIndex === cardIndex) {
-                selecao = null; // Desmarcar
-            } else {
-                selecao = { origem, colIndex, cardIndex, carta };
-            }
-            renderizar();
-        }
-
-        function selecionarDestino(destino, colIndex = null) {
-            if (!selecao) return;
-
-            let pilhaDestino = obterPilha(destino, colIndex);
-            let pilhaOrigem = obterPilha(selecao.origem, selecao.colIndex);
-            let cartasMovidas = pilhaOrigem.slice(selecao.cardIndex);
-
-            if (movimentoValido(cartasMovidas[0], pilhaDestino, destino)) {
-                // Executar movimento
-                pilhaDestino.push(...cartasMovidas);
-                pilhaOrigem.splice(selecao.cardIndex);
-
-                // Virar a próxima carta do tableau, se houver
-                if (selecao.origem === 'tableau' && pilhaOrigem.length > 0) {
-                    pilhaOrigem[pilhaOrigem.length - 1].virada = true;
-                }
-                selecao = null;
-                verificarVitoria();
-            } else {
-                selecao = null; // Movimento inválido cancela a seleção
-            }
-            renderizar();
-        }
-
-        function obterPilha(tipo, index) {
-            if (tipo === 'waste') return estado.waste;
-            if (tipo === 'foundation') return estado.foundations[index];
-            if (tipo === 'tableau') return estado.tableau[index];
-        }
-
-        function movimentoValido(carta, pilhaDestino, destino) {
-            let topo = pilhaDestino[pilhaDestino.length - 1];
-
-            if (destino === 'foundation') {
-                // Só pode mover uma carta por vez para a fundação
-                if (selecao.origem === 'tableau' && selecao.cardIndex !== obterPilha('tableau', selecao.colIndex).length - 1) return false;
-                
-                if (!topo) return carta.valor === 1; // Ás primeiro
-                return carta.naipe === topo.naipe && carta.valor === topo.valor + 1;
-            }
-
-            if (destino === 'tableau') {
-                if (!topo) return carta.valor === 13; // Rei em espaço vazio
-                return carta.cor !== topo.cor && carta.valor === topo.valor - 1;
-            }
-            return false;
-        }
-
-        function criarElementoCarta(carta, origem, colIndex, cardIndex, cascata = 0) {
-            let div = document.createElement('div');
-            div.className = `card ${carta.virada ? carta.cor : 'face-down'}`;
-            if (selecao && selecao.origem === origem && selecao.colIndex === colIndex && selecao.cardIndex <= cardIndex) {
-                div.classList.add('selected');
-            }
-
-            if (carta.virada) {
-                div.innerHTML = `<span>${carta.label}</span><div class="suit-big">${carta.naipe}</div>`;
-            }
-
-            if (cascata > 0) {
-                // Espaçamento de 25px para mobile
-                div.style.top = `${cascata * 25}px`;
-                div.style.zIndex = cascata;
-            }
-
-            div.onclick = (e) => selecionarCarta(e, origem, colIndex, cardIndex);
-            return div;
-        }
-
-        function renderizar() {
-            // Renderizar Estoque
-            let stockDiv = document.getElementById('stock');
-            stockDiv.innerHTML = '';
-            if (estado.stock.length > 0) {
-                let carta = estado.stock[estado.stock.length - 1];
-                stockDiv.appendChild(criarElementoCarta(carta, 'stock', null, 0));
-            }
-
-            // Renderizar Descarte
-            let wasteDiv = document.getElementById('waste');
-            wasteDiv.innerHTML = '';
-            if (estado.waste.length > 0) {
-                let carta = estado.waste[estado.waste.length - 1];
-                wasteDiv.appendChild(criarElementoCarta(carta, 'waste', null, estado.waste.length - 1));
-            }
-
-            // Renderizar Fundações
-            for (let i = 0; i < 4; i++) {
-                let foundDiv = document.getElementById(`found-${i}`);
-                foundDiv.innerHTML = '';
-                if (estado.foundations[i].length > 0) {
-                    let carta = estado.foundations[i][estado.foundations[i].length - 1];
-                    foundDiv.appendChild(criarElementoCarta(carta, 'foundation', i, estado.foundations[i].length - 1));
-                }
-            }
-
-            // Renderizar Tableau
-            for (let i = 0; i < 7; i++) {
-                let tabDiv = document.getElementById(`tab-${i}`);
-                tabDiv.innerHTML = '';
-                estado.tableau[i].forEach((carta, index) => {
-                    tabDiv.appendChild(criarElementoCarta(carta, 'tableau', i, index, index));
-                });
-            }
-        }
-
-        function verificarVitoria() {
-            let totalFundacao = estado.foundations.reduce((acc, f) => acc + f.length, 0);
-            if (totalFundacao === 52) {
-                setTimeout(() => { alert("Parabéns! Você venceu a partida!"); }, 300);
-            }
-        }
-
-        window.onload = iniciarJogo;
-    </script>
+initGame();
+</script>
 </body>
 </html>
